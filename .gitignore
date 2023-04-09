@@ -4,3 +4,6 @@
 # Zig
 zig-cache
 zig-out
+
+# Valgrind
+vgcore*
