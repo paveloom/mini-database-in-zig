@@ -151,6 +151,21 @@ fn handleGet(client_writer: anytype, route: []const u8) !void {
     }
 }
 
+fn formatStore() ![]const u8 {
+    var string: []const u8 = "";
+    var store_iterator = store.iterator();
+    while (store_iterator.next()) |entry| {
+        const key = entry.key_ptr.*;
+        const value = entry.value_ptr.*;
+        const row = try std.fmt.allocPrint(allocator, "{s}: {s}\n", .{ key, value });
+        const new_string = try std.mem.concat(allocator, u8, &.{ string, row });
+        allocator.free(string);
+        allocator.free(row);
+        string = new_string;
+    }
+    return string;
+}
+
 pub fn main() !void {
     // Exit gracefully on interrupt
     const act = std.os.Sigaction{
@@ -210,6 +225,14 @@ pub fn main() !void {
                 \\
             });
         }
+
+        const file = try std.fs.cwd().createFile("store", .{});
+        defer file.close();
+
+        const file_writer = file.writer();
+        const store_string = try formatStore();
+        try file_writer.print("{s}", .{store_string});
+        allocator.free(store_string);
 
         std.log.info("Connection closed!\n", .{});
     }

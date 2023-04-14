@@ -7,3 +7,6 @@ zig-out
 
 # Valgrind
 vgcore*
+
+# Store
+store
